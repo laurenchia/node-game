@@ -65,8 +65,8 @@ var recursiveAsyncReadLine = function () {
 		result = "FAIL".red;
 	};
 
-	logger.write(guess);
-	
+	logger.write(guess + ", ");
+
     console.log(`Your guess, ${guess} = ` + result);
 
     recursiveAsyncReadLine(); //Calling this function again to ask new question
