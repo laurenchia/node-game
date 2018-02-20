@@ -38,36 +38,55 @@ function checkSumOfDigits(guess) {
 //https://stackoverflow.com/questions/24464404/how-to-readline-infinitely-in-node-js
 var recursiveAsyncReadLine = function () {
   rl.question('\nPlease input your guess: ', function (guess) {
-  	var result = "PASS".green;
+  	var result = "PASS";
 
   	//Condition 1 - Fails if it IS NOT a number
     if (isNaN(guess)) 
     {
-    	result = "FAIL".red;
+    	result = "FAIL";
 
     };
 
 	//Condition 2 - Fails if it IS NOT odd
 	if (guess % 2 == 0) //remainder is 0 
 	{
-		result = "FAIL".red;
+		result = "FAIL";
 	};
 
 	//Condition 3 - Fails if it IS NOT a palindrome
 	if (checkPalindrome(guess) != true)
 	{
-		result = "FAIL".red;
+		result = "FAIL";
 	};
 
 	//Condition 4 - Fails if sum of all digits IS GREATER THAN 7
 	if (checkSumOfDigits(guess) > 7)
 	{
-		result = "FAIL".red;
+		result = "FAIL";
 	};
 
-	logger.write(guess + ", ");
+	logger.write(guess + ", " + result + ", ");
 
-    console.log(`Your guess, ${guess} = ` + result);
+	//Display result with colour
+	var displayResult = "";
+	if (result === "PASS")
+	{
+		displayResult = result.green;
+	}
+	else
+	{
+		displayResult = result.red;
+	};
+
+	//Input or not?
+	if (guess === "")
+	{
+		console.log("Please provide an input! :)".red);
+	}
+	else
+	{
+    	console.log(`Your guess, ${guess} = ` + displayResult);
+	};
 
     recursiveAsyncReadLine(); //Calling this function again to ask new question
   });
