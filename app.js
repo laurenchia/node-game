@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 'use strict';
 
-const program = require('commander');
+//const program = require('commander');
 const readline = require('readline');
 var colors = require('colors');
+var fs = require('fs');
 
 //Instructions
 console.log("Welcome to Inlight!\n".cyan
@@ -12,13 +13,26 @@ console.log("Welcome to Inlight!\n".cyan
  	+ "Good luck!".cyan
  );
 
+var logger = fs.createWriteStream('nodeGameLog.txt', {
+  flags: 'a' // 'a' means appending (old data will be preserved)
+})
+
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout
 });
 
-function checkPalindrome(str) {
-  return str == str.split('').reverse().join('');
+function checkPalindrome(guess) {
+  	return guess == guess.split('').reverse().join('');
+};
+
+function checkSumOfDigits(guess) {
+	var sum = 0;
+	while(guess){
+		sum += guess % 10;
+		guess = Math.floor(guess / 10);
+	};
+	return sum;
 };
 
 //https://stackoverflow.com/questions/24464404/how-to-readline-infinitely-in-node-js
@@ -40,11 +54,19 @@ var recursiveAsyncReadLine = function () {
 	};
 
 	//Condition 3 - Fails if it IS NOT a palindrome
+	if (checkPalindrome(guess) != true)
+	{
+		result = "FAIL".red;
+	};
 
+	//Condition 4 - Fails if sum of all digits IS GREATER THAN 7
+	if (checkSumOfDigits(guess) > 7)
+	{
+		result = "FAIL".red;
+	};
 
-	//Condition 4 - Fails if sum of all digits are NOT 7
-
-
+	logger.write(guess);
+	
     console.log(`Your guess, ${guess} = ` + result);
 
     recursiveAsyncReadLine(); //Calling this function again to ask new question
