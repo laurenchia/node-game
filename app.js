@@ -1,95 +1,86 @@
 #!/usr/bin/env node
 'use strict';
 
-//const program = require('commander');
+const colors = require('colors');
+const fs = require('fs');
+const path = require('path');
 const readline = require('readline');
-var colors = require('colors');
-var fs = require('fs');
 
-//Instructions
-console.log("Welcome to Inlight!\n".cyan
-	+ "This is a problem solving game where you need to figure out the 4 rules that we've applied that determine whether an input PASSES or FAILS.\n"
- 	+ "We want you to enter different inputs and use your problem solving skills to determine what our rules are to make an input PASS.\n"
- 	+ "Good luck!".cyan
- );
+const checkSumOfDigits = require('./checks/check-sum-digits');
+const notANumber = require('./checks/check-number');
+const notOdd = require('./checks/check-odd');
+const palindrome = require('./checks/check-palindrome');
 
-var logger = fs.createWriteStream('nodeGameLog.txt', {
-  flags: 'a' // 'a' means appending (old data will be preserved)
+//Creates Write Stream and file with timestamp
+const date = new Date();
+const dDate = date.getDate();
+const dMonth = date.getMonth()+1; //getMonth starts at 0
+const dYear = date.getFullYear();
+const dHour = date.getHours();
+const dMinutes = date.getMinutes().toString().padStart(2, '0');
+const dateFile = `${dDate}-${dMonth}-${dYear}_${dHour}-${dMinutes}.txt`;
+
+const LOG_DIR = './logs';
+//Creates segments of file path
+const filepath = path.resolve(LOG_DIR, dateFile);
+
+//Checks if file exists, if not - makes one
+if (!fs.existsSync(LOG_DIR)){
+	fs.mkdirSync(LOG_DIR);
+}
+
+//Creates log file in log folder
+const logger = fs.createWriteStream(filepath, {
+	flags: 'a' // 'a' means appending (old data will be preserved)
 })
 
+//Reads terminal for inputs and outputs
 const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
+	input: process.stdin,
+	output: process.stdout
+})
 
-function checkPalindrome(guess) {
-  	return guess == guess.split('').reverse().join('');
-};
+const FAIL = 'FAIL';
+const PASS = 'PASS';
 
-function checkSumOfDigits(guess) {
-	var sum = 0;
-	while(guess){
-		sum += guess % 10;
-		guess = Math.floor(guess / 10);
-	};
-	return sum;
-};
+//Instructions
+console.log('Welcome to Inlight!\n'.cyan
+	+ 'This is a problem solving game where you need to figure out the rules that we\'ve applied that determine whether an input PASSES or FAILS.\n'
+ 	+ 'We want you to enter different inputs and use your problem solving skills to determine what our rules are to make an input PASS.\n'
+ 	+ 'Good luck!'.cyan
+ )
 
 //https://stackoverflow.com/questions/24464404/how-to-readline-infinitely-in-node-js
-var recursiveAsyncReadLine = function () {
-  rl.question('\nPlease input your guess: ', function (guess) {
-  	var result = "PASS";
+const recursiveAsyncReadLine = function () {
+	rl.question('\nPlease type your guess: ', function (guess) {
+		if (guess === '') {
+			console.log('Please provide an input! :)'.red);
+		} else {
+			let result = true;
 
-  	//Condition 1 - Fails if it IS NOT a number
-    if (isNaN(guess)) 
-    {
-    	result = "FAIL";
+			let checks = [notANumber, notOdd, palindrome, checkSumOfDigits];
 
-    };
+			for (let i = 0; i < checks.length; i++){
+				const fn = checks[i];
+				result = fn(guess);
+				if (result == false) {
+					break;
+				}
+			}	
 
-	//Condition 2 - Fails if it IS NOT odd
-	if (guess % 2 == 0) //remainder is 0 
-	{
-		result = "FAIL";
-	};
+			if (result) {
+				console.log(`Your guess, ${guess} = ` + (PASS).green);	
+				//Writes in log file
+				logger.write(guess + ', ' + PASS + ', ');
+			} else {
+				console.log(`Your guess, ${guess} = ` + (FAIL).red);
+				//Writes in log file
+				logger.write(guess + ', ' + FAIL + ', ');
+			}
 
-	//Condition 3 - Fails if it IS NOT a palindrome
-	if (checkPalindrome(guess) != true)
-	{
-		result = "FAIL";
-	};
-
-	//Condition 4 - Fails if sum of all digits IS GREATER THAN 7
-	if (checkSumOfDigits(guess) > 7)
-	{
-		result = "FAIL";
-	};
-
-	logger.write(guess + ", " + result + ", ");
-
-	//Display result with colour
-	var displayResult = "";
-	if (result === "PASS")
-	{
-		displayResult = result.green;
-	}
-	else
-	{
-		displayResult = result.red;
-	};
-
-	//Input or not?
-	if (guess === "")
-	{
-		console.log("Please provide an input! :)".red);
-	}
-	else
-	{
-    	console.log(`Your guess, ${guess} = ` + displayResult);
-	};
-
-    recursiveAsyncReadLine(); //Calling this function again to ask new question
-  });
-};
+		}
+	    recursiveAsyncReadLine(); //Calling this function again to ask new question
+  	})
+}
 
 recursiveAsyncReadLine(); //we have to actually start our recursion somehow
