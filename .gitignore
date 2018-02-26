@@ -1,2 +1,3 @@
 /node_modules
-/nodeGameLog.txt
+/logs
+.DS_Store
