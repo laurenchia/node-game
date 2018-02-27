@@ -1,4 +1,4 @@
-//Condition 3 - Fails if it IS NOT a palindrome
+//Fails if it IS NOT a palindrome
 module.exports = function (guess) {
 	const array = guess.split('');
 	const numbersOnly = array.filter(digit => !isNaN(digit));

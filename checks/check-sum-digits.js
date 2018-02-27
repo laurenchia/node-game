@@ -1,4 +1,4 @@
-//Condition 4 - Fails if sum of all digits IS GREATER THAN 7
+//Fails if sum of all digits IS GREATER THAN 7
 module.exports = function (guess) {
 	let sum = 0;
 	const array = guess.split('');
